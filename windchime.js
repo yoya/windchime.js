@@ -6,8 +6,7 @@ var tubeNum = 24;
  * WebAudio
  */
 window.AudioContext = window.AudioContext||window.webkitAudioContext;
-//      var context = new webkitAudioContext();
-var context = new AudioContext();
+var context = null;
 
 var MusicBox = function(keyNum) {
     this.keyNum = keyNum;
@@ -64,11 +63,24 @@ var isMouseDown = false, mouseJoint = null;
 var mouseX = null, mouseY = null;
 
 function init() {
-    // WebAudio
-    var tubeBox = new MusicBox(tubeNum);
-    tubeBox.load("Glocken.m4a");
-    
-    
+    var tubeBox = null;
+    function initAudio() {
+        if (context) { return ; }
+        // WebAudio
+        console.debug("initAudio");
+        context = new AudioContext();
+        tubeBox = new MusicBox(tubeNum);
+        tubeBox.load("Glocken.m4a");
+        // dummy play
+        var osc = context.createOscillator();
+        var gain = context.createGain();
+        osc.connect(context.gain);
+        gain.connect(context.destination);
+        gain.gain.value = 0;
+        osc.start(0);
+        osc.stop(0);
+        osc = gain = null;
+    }
     // Box2dWeb
     var   b2Vec2 = Box2D.Common.Math.b2Vec2
     ,  b2World = Box2D.Dynamics.b2World
@@ -181,11 +193,13 @@ function init() {
     document.addEventListener("touchmove", handleTouchMove, true);
     
     function handleMouseMove(e) {
+        initAudio();
         mouseX = (e.clientX - canvasPosition.x) / world.m_debugDraw.m_drawScale;
         mouseY = (e.clientY - canvasPosition.y) / world.m_debugDraw.m_drawScale;
     }
     
     function handleTouchMove(e) {
+        initAudio();
         e.preventDefault(); 
         mouseX = (e.touches[0].pageX - canvasPosition.x) / world.m_debugDraw.m_drawScale;
         mouseY = (e.touches[0].pageY - canvasPosition.y) / world.m_debugDraw.m_drawScale;
