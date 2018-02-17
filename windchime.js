@@ -74,7 +74,8 @@ function init() {
         // dummy play
         var osc = context.createOscillator();
         var gain = context.createGain();
-        osc.connect(context.gain);
+        //osc.connect(context.gain);
+	osc.connect(gain);
         gain.connect(context.destination);
         gain.gain.value = 0;
         osc.start(0);
